@@ -1,1 +1,12 @@
-netbox
+# yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+# yum install postgresql96 postgresql96-server postgresql96-devel
+# /usr/pgsql-9.6/bin/postgresql96-setup initdb
+vi /var/lib/pgsql/9.6/data/pg_hba.conf
+
+yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis
+https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install -y http://dl.marmotte.net/rpms/redhat/el7/x86_64/python-rpm-macros-3-18.el7/python-rpm-macros-3-18.el7.noarch.rpm http://dl.marmotte.net/rpms/redhat/el7/x86_64/python-rpm-macros-3-18.el7/python-srpm-macros-3-18.el7.noarch.rpm
+yum install -y python34 python34-devel python34-setuptools
+easy_install-3.4 pip
+ln -s /usr/bin/python3.4 /usr/bin/python3
+wget https://github.com/netbox-community/netbox/archive/v2.6.7.tar.gz
