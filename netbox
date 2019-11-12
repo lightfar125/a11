@@ -1,9 +1,10 @@
 enable epel
-https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install supervisor nginx
 
-# yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
-# yum install postgresql96 postgresql96-server postgresql96-devel
-# /usr/pgsql-9.6/bin/postgresql96-setup initdb
+yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+yum install postgresql96 postgresql96-server postgresql96-devel
+/usr/pgsql-9.6/bin/postgresql96-setup initdb
 vi /var/lib/pgsql/9.6/data/pg_hba.conf
 systemctl start postgresql-9.6 && systemctl enable postgresql-9.6
 sudo -u postgres psql
@@ -13,14 +14,24 @@ GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
 \q
 psql -U netbox -W -h localhost netbox
 
-yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis bzip2-devel sqlite-devel git
+yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis bzip2-devel sqlite-devel git wget
+
+Python3.6
+cd /usr/src
+wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
+tar xzf Python-3.6.9.tgz
+cd Python-3.6.9
+./configure --enable-optimizations 
+make altinstall
+ ln -s /usr/local/bin/python3.6 /usr/bin/python3
+
 
 mkdir -p /opt/netbox && cd /opt/netbox
 git clone -b master https://github.com/netbox-community/netbox.git .
 pip3.6 install -r requirements.txt
 cd netbox
 ./generate_secret_key.py
-vMca%K#E3Af-nOjR8NJ)y5S=Qq76*xswPlDGI(T$mpu4WX&U0H
+snc^qwD+1Mp*5djh-P8_S%&43Ge#N@f06(LkVQzCY2B7TIOtoa
 cd netbox
 cp configuration.example.py configuration.py        
 vi configuration.py
@@ -28,53 +39,58 @@ cd /opt/netbox/netbox
 python3 manage.py migrate
 python3 manage.py createsuperuser
 python3 manage.py collectstatic --no-input
+python3 manage.py loaddata initial_data
+
+python3 manage.py runserver 0.0.0.0:8000 --insecure
 
 
-Python3.6
-cd /usr/src
-wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-tar xzf Python-3.6.9.tgz
-cd Python-3.6.9
-./configure --enable-optimizations
-make altinstall
- ln -s /usr/local/bin/python3.6 /usr/bin/python3
 
-daemon off;
-worker_processes 1;
 
-error_log /dev/stderr info;
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install supervisor nginx
 
-events {
-    worker_connections 1024;
-}
 
-http {
-    include              /etc/nginx/mime.types;
-    default_type         application/octet-stream;
-    sendfile             on;
-    tcp_nopush           on;
-    keepalive_timeout    65;
-    gzip                 on;
-    server_tokens        off;
-    client_max_body_size 10M;
+vi /opt/netbox/gunicorn_config.py
+command = '/usr/bin/gunicorn'
+pythonpath = '/opt/netbox/netbox'
+bind = '127.0.0.1:8001'
+workers = 3
+user = 'nginx'
 
-    server {
-        listen      8080;
-        access_log  off;
 
-        location /static/ {
-            alias /opt/netbox/netbox/static/;
-        }
 
-        location / {
-            proxy_pass http://netbox:8001;
-            proxy_set_header X-Forwarded-Host $http_host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            add_header P3P 'CP="ALL DSP COR PSAa PSDa OUR NOR ONL UNI COM NAV"';
-        }
+vi /etc/supervisord.d/netbox.ini
+[program:netbox]
+command = gunicorn -c /opt/netbox/gunicorn_config.py netbox.wsgi
+directory = /opt/netbox/netbox/
+user = nginx
+
+systemctl enable supervisord && systemctl start supervisord
+
+
+
+vi /etc/nginx/conf.d/netbox.conf
+server {
+    listen 80;
+
+    server_name netbox.example.com;
+
+    client_max_body_size 25m;
+
+    location /static/ {
+        alias /opt/netbox/netbox/static/;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header P3P 'CP="ALL DSP COR PSAa PSDa OUR NOR ONL UNI COM NAV"';
     }
 }
+
+systemctl enable nginx && systemctl start nginx
 
 ##reference
 https://packetpushers.net/install-netbox-centos-7/
