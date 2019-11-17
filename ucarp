@@ -1,0 +1,39 @@
+host1
+$ cp /etc/ucarp/vip-001.conf.example /etc/ucarp/vip-001.conf
+$ cat /etc/ucarp/vip-001.conf
+ID=001  
+BIND_INTERFACE="eth0"  
+SOURCE_ADDRESS="172.16.9.2"  
+VIP_ADDRESS="172.16.9.1"  
+PASSWORD="mysecret"  
+OPTIONS="–shutdown –preempt"  
+UPSCRIPT=/usr/libexec/ucarp/vip-up  
+DOWNSCRIPT=/usr/libexec/ucarp/vip-down  
+
+
+host2
+$ cp /etc/ucarp/vip-001.conf.example /etc/ucarp/vip-001.conf
+$ cat /etc/ucarp/vip-001.conf
+ID=001  
+BIND_INTERFACE="eth0"  
+SOURCE_ADDRESS="172.16.9.3"  
+VIP_ADDRESS="172.16.9.1"  
+PASSWORD="mysecret"  
+OPTIONS="–shutdown –preempt"  
+UPSCRIPT=/usr/libexec/ucarp/vip-up  
+DOWNSCRIPT=/usr/libexec/ucarp/vip-down 
+
+
+$ cat /run/systemd/system/ucarp@.service
+[Unit]
+Description=UCARP virtual interface %I  
+After=network.target  
+[Service]
+Type=simple  
+EnvironmentFile=-/etc/ucarp/vip-common.conf  
+EnvironmentFile=-/etc/ucarp/vip-%I.conf  
+ExecStart=/usr/sbin/ucarp -i $BIND_INTERFACE -p $PASSWORD -v %I -a $VIP_ADDRESS -s $SOURCE_ADDRESS $OPTIONS -u $UPSCRIPT -d $DOWNSCRIPT  
+KillMode=control-group  
+[Install]
+WantedBy=multiuser.target  
+$ systemctl start ucarp@001
