@@ -1,4 +1,4 @@
-enable epel
+enable epel RHEL7.7(preinstall python3)
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install supervisor nginx
 
@@ -28,7 +28,8 @@ make altinstall
 
 mkdir -p /opt/netbox && cd /opt/netbox
 git clone -b master https://github.com/netbox-community/netbox.git .
-pip3.6 install -r requirements.txt
+pip3 install -r requirements.txt
+pip3 install gunicorn
 cd netbox
 ./generate_secret_key.py
 snc^qwD+1Mp*5djh-P8_S%&43Ge#N@f06(LkVQzCY2B7TIOtoa
