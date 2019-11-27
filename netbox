@@ -52,7 +52,7 @@ yum install supervisor nginx
 
 
 vi /opt/netbox/gunicorn_config.py
-command = '/usr/bin/gunicorn'
+command = '/usr/local/bin/gunicorn'
 pythonpath = '/opt/netbox/netbox'
 bind = '127.0.0.1:8001'
 workers = 3
@@ -74,7 +74,7 @@ vi /etc/nginx/conf.d/netbox.conf
 server {
     listen 80;
 
-    server_name netbox.example.com;
+    server_name 192.168.81.122;
 
     client_max_body_size 25m;
 
