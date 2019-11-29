@@ -13,6 +13,7 @@ CREATE USER netbox WITH PASSWORD 'passnetbox';
 GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
 \q
 psql -U netbox -W -h localhost netbox
+systemctl restart postgresql-9.6
 
 yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis bzip2-devel sqlite-devel git wget
 
