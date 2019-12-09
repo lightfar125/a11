@@ -3,10 +3,21 @@ yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.r
 yum install supervisor nginx
 
 yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+
 yum install postgresql96 postgresql96-server postgresql96-devel
+yum install postgresql95-server postgresql95
+
 /usr/pgsql-9.6/bin/postgresql96-setup initdb
+/usr//pgsql-9.5/bin/postgresql95-setup initdb
+
 vi /var/lib/pgsql/9.6/data/pg_hba.conf
+vi /var/lib/pgsql/9.5/data/pg_hba.conf
+
 systemctl start postgresql-9.6 && systemctl enable postgresql-9.6
+ systemctl enable --now postgresql-9.5
+
+
+
 sudo -u postgres psql
 CREATE DATABASE netbox;
 CREATE USER netbox WITH PASSWORD 'passnetbox';
@@ -14,6 +25,8 @@ GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
 \q
 psql -U netbox -W -h localhost netbox
 systemctl restart postgresql-9.6
+systemctl restart postgresql-9.5
+
 
 yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis bzip2-devel sqlite-devel git wget
 
