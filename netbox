@@ -32,7 +32,9 @@ yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-dev
 
 Python3.6
 cd /usr/src
+
 wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
+wget https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz
 tar xzf Python-3.6.9.tgz
 cd Python-3.6.9
 ./configure --enable-optimizations 
@@ -41,7 +43,10 @@ make altinstall
 
 
 mkdir -p /opt/netbox && cd /opt/netbox
+
 git clone -b master https://github.com/netbox-community/netbox.git .
+https://github.com/digitalocean/netbox/archive/v2.3.7.tar.gz
+
 pip3 install -r requirements.txt
 pip3 install gunicorn
 cd netbox
