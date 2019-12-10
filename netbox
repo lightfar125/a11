@@ -8,7 +8,7 @@ yum install postgresql96 postgresql96-server postgresql96-devel
 yum install postgresql95-server postgresql95
 
 /usr/pgsql-9.6/bin/postgresql96-setup initdb
-/usr//pgsql-9.5/bin/postgresql95-setup initdb
+/usr/pgsql-9.5/bin/postgresql95-setup initdb
 
 vi /var/lib/pgsql/9.6/data/pg_hba.conf
 vi /var/lib/pgsql/9.5/data/pg_hba.conf
