@@ -1,3 +1,4 @@
+setenforce
 enable epel RHEL7.7(preinstall python3)
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install supervisor nginx
