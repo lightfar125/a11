@@ -4,20 +4,10 @@ yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.r
 yum install supervisor nginx
 
 yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
-
-yum install postgresql96 postgresql96-server postgresql96-devel
-yum install postgresql95-server postgresql95
-
-/usr/pgsql-9.6/bin/postgresql96-setup initdb
+yum install postgresql95-server postgresql95 postgresql95-devel
 /usr/pgsql-9.5/bin/postgresql95-setup initdb
-
-vi /var/lib/pgsql/9.6/data/pg_hba.conf
 vi /var/lib/pgsql/9.5/data/pg_hba.conf
-
-systemctl start postgresql-9.6 && systemctl enable postgresql-9.6
- systemctl enable --now postgresql-9.5
-
-
+systemctl enable --now postgresql-9.5
 
 sudo -u postgres psql
 CREATE DATABASE netbox;
@@ -43,10 +33,10 @@ make altinstall
  ln -s /usr/local/bin/python3.6 /usr/bin/python3
 
 
-mkdir -p /opt/netbox && cd /opt/netbox
-
-git clone -b master https://github.com/netbox-community/netbox.git .
-https://github.com/digitalocean/netbox/archive/v2.3.7.tar.gz
+cd /opt/netbox
+wget https://github.com/netbox-community/netbox/archive/v2.4.9.tar.gz
+###git clone -b master https://github.com/netbox-community/netbox.git .
+tar xzf v2.4.9.tar.gz
 
 pip3 install -r requirements.txt
 pip3 install gunicorn
