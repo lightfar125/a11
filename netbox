@@ -1,7 +1,9 @@
-setenforce
-enable epel RHEL7.7(preinstall python3)
-yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-yum install supervisor nginx
+======================
+Notes
+=======================
+########setenforce
+########enable epel RHEL7.7(preinstall python3)
+
 
 yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
 yum install postgresql95-server postgresql95 postgresql95-devel
@@ -20,10 +22,11 @@ systemctl restart postgresql-9.5
 
 
 yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis bzip2-devel sqlite-devel git wget
-
+===============================
+RHEL below 7.7 require python3.6
+===============================
 Python3.6
 cd /usr/src
-
 wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
 wget https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz
 tar xzf Python-3.6.9.tgz
@@ -33,13 +36,18 @@ make altinstall
  ln -s /usr/local/bin/python3.6 /usr/bin/python3
 
 
-cd /opt/netbox
+cd /opt/
 wget https://github.com/netbox-community/netbox/archive/v2.4.9.tar.gz
 ###git clone -b master https://github.com/netbox-community/netbox.git .
 tar xzf v2.4.9.tar.gz
-
+mv netbox-2.4.9/ netbox
+cd netbox
+pip3.6 install -r requirements.txt
 pip3 install -r requirements.txt
+
+pip3.6 install gunicorn
 pip3 install gunicorn
+
 cd netbox
 ./generate_secret_key.py
 snc^qwD+1Mp*5djh-P8_S%&43Ge#N@f06(LkVQzCY2B7TIOtoa
@@ -54,7 +62,7 @@ python3 manage.py loaddata initial_data
 
 python3 manage.py runserver 0.0.0.0:8000 --insecure
 
-
+chcon -Rt httpd_sys_content_t /opt/netbox/netbox/static
 
 
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
