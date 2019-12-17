@@ -2,6 +2,10 @@
 Notes
 =======================
 ########setenforce
+setsebool -P httpd_can_network_connect 1
+setsebool -P nis_enabled 1
+chcon -Rt httpd_sys_content_t /opt/netbox/netbox/static
+
 ########enable epel RHEL7.7(preinstall python3)
 
 
@@ -63,6 +67,8 @@ python3 manage.py loaddata initial_data
 python3 manage.py runserver 0.0.0.0:8000 --insecure
 
 chcon -Rt httpd_sys_content_t /opt/netbox/netbox/static
+setsebool -P httpd_can_network_connect 1
+setsebool -P nis_enabled 1
 
 
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
