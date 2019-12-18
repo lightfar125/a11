@@ -1,0 +1,29 @@
+MasterDown
+#!/bin/bash
+#/bin/sed -i 's/'on'/'off'/g'  /var/lib/pgsql/9.6/data/recovery.conf
+mv /var/lib/pgsql/9.6/data/recovery.conf /var/lib/pgsql/9.6/data/recovery.done
+systemctl restart postgresql-9.6
+
+
+
+Master_resume.s
+#!/bin/bash
+echo Stopping PostgreSQL
+systemctl stop postgresql-9.6
+
+echo Cleaning up old cluster directory
+sudo -u postgres rm -rf /var/lib/pgsql/9.6/data
+
+echo Starting base backup as replicator
+sudo -u postgres PGPASSWORD=password123 pg_basebackup -h 192.168.81.121 -D /var/                                                                             lib/pgsql/9.6/data -U replica -v -P
+
+echo Writing recovery.conf file
+sudo -u postgres bash -c "cat > /var/lib/pgsql/9.6/data/recovery.conf <<- _EOF_
+standby_mode = 'on'
+primary_conninfo = 'host=192.168.81.121 port=5432 user=replica password=password                                                                             123 application_name=netbox_sync'
+restore_command = 'cp /var/lib/pgsql/9.6/data/archive/%f %p'
+trigger_file = '/tmp/postgresql.trigger.5432'
+_EOF_
+"
+echo Startging PostgreSQL
+systemctl restart postgresql-9.6
