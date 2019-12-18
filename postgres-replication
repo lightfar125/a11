@@ -27,3 +27,8 @@ _EOF_
 "
 echo Startging PostgreSQL
 systemctl restart postgresql-9.6
+
+
+Check replication status
+su - postgres
+psql -x -c "select * from pg_stat_replication;"
