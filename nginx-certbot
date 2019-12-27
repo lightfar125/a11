@@ -104,6 +104,7 @@ systemctl reload nginx
 
 certbot certonly --agree-tos --email admin@example.com --webroot -w /var/lib/letsencrypt/ -d singnet.com.sg -d netbox1.singnet.com.sg
 
+certbot register --update-registration --email thenew@email.address
 
 /etc/nginx/conf.d/example.com.conf
 server {
