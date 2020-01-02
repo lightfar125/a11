@@ -58,6 +58,7 @@ Public domain tld
 yum install  https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/c/certbot-1.0.0-1.el7.noarch.rpm https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/p/python2-certbot-1.0.0-1.el7.noarch.rpm http://mirror.centos.org/centos/7/os/x86_64/Packages/python-zope-interface-4.0.5-4.el7.x86_64.rpm
 openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
 sudo mkdir -p /var/lib/letsencrypt/.well-known
+chown -R nginx:nginx /var/lib/letsencrypt/.well-known 
 sudo chgrp nginx /var/lib/letsencrypt
 sudo chmod g+s /var/lib/letsencrypt
 mkdir /etc/nginx/snippets
@@ -112,7 +113,7 @@ server {
     server_name www.example.com example.com;
 
     include snippets/letsencrypt.conf;
-    return 301 https://$host$request_uri;
+    
 }
 
 server {
@@ -140,3 +141,7 @@ server {
 
     # . . . other code
 }
+
+
+/etc/nginx/nginx.conf
+return 301 https://$host$request_uri;
