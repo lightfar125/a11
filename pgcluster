@@ -1,0 +1,193 @@
+Pre-install
+
+Share VMDK
+
+Node1 SN-SINQT1-A2010
+firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.83.77" service name="high-availability" accept' --permanent
+firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.83.0/23" service name="postgresql" accept' --permanent
+
+Node2 SN-SINTP1-A2011
+firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.82.95" service name="high-availability" accept' --permanent
+firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.82.0/23" service name="postgresql" accept' --permanent
+
+
+
+vi /etc/hosts
+192.168.82.95	sn-sinqt1-a2010
+192.168.83.77	sn-sintp1-a2011
+
+
+yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+yum install postgresql95-server postgresql95 postgresql95-devel -y
+
+repo
+rhel-ha-for-rhel-7-server-rpms
+rhel-rs-for-rhel-7-server-rpms
+
+
+rhel-7-server-optional-rpms
+
+
+
+On node 1:
+[root@node1 ~]# yum install pcs pacemaker corosync pacemaker-remote fence-agents-all lvm2-cluster resource-agents psmisc policycoreutils-python gfs2-utils
+
+On node 2:
+[root@node2 ~]# yum install pcs pacemaker corosync fence-agents-virsh fence-virt pacemaker-remote fence-agents-all lvm2-cluster resource-agents psmisc policycoreutils-python gfs2-utils
+
+
+On node 1:
+[root@node1 ~]# echo "@SNBBRHEL7cis" | passwd hacluster --stdin
+
+On node 2:
+[root@node2 ~]# echo "@SNBBRHEL7cis" | passwd hacluster --stdin
+
+
+On node1:
+[root@node1 ~]# systemctl start pcsd.service; systemctl enable pcsd.service
+
+On node2:
+[root@node2 ~]# systemctl start pcsd.service; systemctl enable pcsd.service
+
+
+[root@node1 ~]# firewall-cmd --permanent --add-service=high-availability
+[root@node1 ~]# firewall-cmd --reload
+
+On Node 2:
+[root@node2 ~]# firewall-cmd --permanent --add-service=high-availability
+[root@node2 ~]# firewall-cmd --reload
+
+On node1:
+pcs cluster auth postgres1 postgres2 -u hacluster -p @SNBBRHEL7cis
+
+pcs cluster setup --start --name pgcluster sn-sinqt1-a2010 sn-sintp1-a2011
+
+
+#pcs cluster setup --start --name gsrcluster1 postgres1 postgres2 --force
+pcs stonith create vmfence fence_vmware_soap pcmk_host_map="<pacemaker_nodename1:sn-sinqt1-a2010;pacemaker_nodename2:sn-sintp1-a2011" ipaddr=192.168.82.152 ssl=1 login="administrator@singnet.local" passwd="p0rt4lSG!.!"
+
+
+
+
+
+####for query testing
+fence_vmware_soap --ip 192.168.82.9 --ssl --ssl-insecure --action list --username="vmfence@vsphere.local" --password="Slk200@mg" | grep postgres1
+
+Check services
+[root@node1 ~]# pcs cluster enable --all
+node 1: pcs status 
+crm_mon -r1
+
+
+
+
+
+
+
+
+
+
+
+
+==================================================================================
+Node1:
+pvcreate /dev/sdb
+vgcreate clustervg /dev/sdb
+lvcreate -l 100%FREE -n lv1 clustervg
+mkfs.xfs /dev/clustervg/lv1
+
+
+[root@node1 ~]# yum install postgresql95-server postgresql95 postgresql95-devel -y
+[root@node2 ~]# yum install postgresql95-server postgresql95 postgresql95-devel -y
+
+
+[root@node1 ~]# mkdir /root/backup
+[root@node1 ~]# mv /var/lib/pgsql/* /root/backup/
+[root@node1 ~]# mount -t xfs /dev/clustervg/lv1 /var/lib/pgsql/
+[root@node1 ~]# mv /root/backup/* /var/lib/pgsql/
+[root@node1 ~]# chown -R postgres:postgres /var/lib/pgsql/
+
+
+
+[root@node1 ~]# su - postgres
+-bash-4.2$ initdb /var/lib/pgsql/data
+[root@node1 data]# cd /var/lib/pgsql/data/
+[root@node1 data]# cp -p postgresql.conf postgresql.conf_orig
+[root@node1 data]# vi postgresql.conf
+listen_addresses = '*'
+wal_level = hot_standby
+synchronous_commit = local
+archive_mode = on
+archive_command = 'cp %p /var/lib/pgsql/data/archive/%f'
+max_wal_senders = 2
+wal_keep_segments = 10
+
+[root@node1 data]# mkdir -p /var/lib/pgsql/data/archive/
+[root@node1 data]# chmod 700 /var/lib/pgsql/data/archive/
+[root@node1 data]# chown -R postgres:postgres /var/lib/pgsql/data/archive/
+[root@node1 data]# vi /var/lib/pgsql/data/pg_hba.conf
+host    all             all             0.0.0.0/0               trust
+host	netbox		netbox		192.168.83.11/32	md5
+host	netbox		netbox		192.168.82.23/32	md5
+	
+
+Node1
+systemctl start postgresql-9.5
+sudo -u postgres psql
+CREATE DATABASE netbox;
+CREATE USER netbox WITH PASSWORD 'passnetbox';
+GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
+\q
+systemctl stop postgresql-9.5
+umount /var/lib/pgsql/
+pcs cluster stop --all
+
+[root@node2 ~]# mkdir /root/backup
+[root@node2 ~]# mv /var/lib/pgsql/* /root/backup/
+
+Execute the following command on cluster nodes to disable and stop lvm2-lvmetad service and replace use_lvmetad = 1 to use_lvmetad = 0 in /etc/lvm/lvm.conf file.
+[root@node1 ~]# lvmconf --enable-halvm --services --startstopservices
+vgs --noheadings -o vg_name
+[root@node2 ~]# lvmconf --enable-halvm --services --startstopservices
+vgs --noheadings -o vg_name
+
+[root@node1 ~]# vi /etc/lvm/lvm.conf
+volume_list = [ "rhel" ]
+
+[root@node2 ~]# vi /etc/lvm/lvm.conf
+volume_list = [ "rhel" ]
+
+[root@node1 ~]# cp -a /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.bak
+[root@node1 ~]# dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
+[root@node1 ~]# reboot 
+lvscan
+
+
+[root@node2 ~]# cp -a /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.bak
+[root@node2 ~]# dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
+[root@node2 ~]# reboot
+lvscan
+
+
+
+node1
+pcs cluster start --all
+pcs resource create postgres-lvm-res LVM volgrpname="clustervg" exclusive=true --group postgres-group
+pcs resource create postgres-fs-res Filesystem  device="/dev/clustervg/lv1" directory="/var/lib/pgsql" fstype="xfs" --group postgres-group
+pcs resource create POSTGRES-VIP ocf:heartbeat:IPaddr2 ip=192.168.82.92 nic="ens192.2008" cidr_netmask=23 op monitor interval=30s --group postgres-group
+pcs resource create postgresql_service ocf:heartbeat:pgsql op monitor timeout=30s interval=30s --group postgres-group
+pcs cluster status
+pcs resource show
+pcs constraint order start postgres-lvm-res then postgres-fs-res
+pcs constraint order start postgres-fs-res then POSTGRES-VIP
+pcs constraint order start POSTGRES-VIP then postgresql_service
+pcs constraint list
+pcs status
+lvscan
+
+Node1,2
+firewall-cmd --add-service=postgresql --permanent
+firewall-cmd --reload
+
+crm_verify -L -V
+crm_mon -r1
