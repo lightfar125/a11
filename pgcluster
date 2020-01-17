@@ -64,7 +64,7 @@ pcs cluster setup --start --name pgcluster sn-sinqt1-a2010 sn-sintp1-a2011
 
 
 #pcs cluster setup --start --name gsrcluster1 postgres1 postgres2 --force
-pcs stonith create vmfence fence_vmware_soap pcmk_host_map="<pacemaker_nodename1:sn-sinqt1-a2010;pacemaker_nodename2:sn-sintp1-a2011" ipaddr=192.168.82.152 ssl=1 login="administrator@singnet.local" passwd="p0rt4lSG!.!"
+
 
 
 
