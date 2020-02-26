@@ -4,10 +4,7 @@ from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 LDAP_SERVER = 'ipa-svr01.singnet.com.sg'
 AUTH_LDAP_SERVER_URI = 'ldap://' + LDAP_SERVER
 
-#AUTH_LDAP_BIND_DN = 'uid=kuangyen,cn=users,cn=accounts,dc=singnet,dc=com,dc=sg'
-#AUTH_LDAP_BIND_DN = 'cn=users,cn=accounts,dc=singnet,dc=com,dc=sg'
 AUTH_LDAP_BIND_DN = ''
-#AUTH_LDAP_BIND_PASSWORD = "Ky#$1919"
 AUTH_LDAP_BIND_PASSWORD = ''
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
 AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,cn=users,cn=accounts,dc=singnet,dc=com,dc=sg'
@@ -18,16 +15,6 @@ AUTH_LDAP_USER_ATTR_MAP = {
     'email': 'mail'
 }
 
-#AUTH_LDAP_GROUP_BASE = "cn=groups,cn=accounts,dc=singnet,dc=com,dc=sg"
-#AUTH_LDAP_GROUP_FILTER = "(objectClass=groupOfNames)"
-#AUTH_LDAP_GROUP_SEARCH = LDAPSearch(AUTH_LDAP_GROUP_BASE,
-#                                    ldap.SCOPE_SUBTREE, AUTH_LDAP_GROUP_FILTER)
-#AUTH_LDAP_GROUP_TYPE = GroupOfNamesType(name_attr="cn")
-#AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-#    'is_staff': 'cn=ipausers,' + AUTH_LDAP_GROUP_BASE,
-#    'is_support': 'cn=ipausers,' + AUTH_LDAP_GROUP_BASE,
-#    'is_superuser': 'cn=ipausers,' + AUTH_LDAP_GROUP_BASE,
-#}
 
 AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
@@ -44,7 +31,3 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 }
 
 AUTH_LDAP_START_TLS = True
-
-
-#     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-#LDAP_IGNORE_CERT_ERRORS = True
