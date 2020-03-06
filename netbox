@@ -50,6 +50,10 @@ cd netbox
 pip3.6 install -r requirements.txt
 pip3 install -r requirements.txt
 
+
+subscription-manager repos --enable rhel-7-server-optional-rpms --enable rhel-server-rhscl-7-rpms
+yum install python3
+
 pip3.6 install gunicorn
 pip3 install gunicorn
 
