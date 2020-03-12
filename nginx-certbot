@@ -23,8 +23,8 @@ server {
 }
 
 
-
-
+cronjob
+0 * * * * /usr/sbin/certbot-auto renew
 
 
 
