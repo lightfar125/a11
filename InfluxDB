@@ -1,0 +1,17 @@
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxDB Repository - RHEL \$releasever
+baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdb.key
+EOF
+
+yum -y install influxdb vim curl
+
+systemctl start influxdb && sudo systemctl enable influxdb
+sudo firewall-cmd --add-port=8086/tcp --permanent
+sudo firewall-cmd --reload
+
+curl -XPOST "http://localhost:8086/query" --data-urlencode "q=CREATE USER username WITH PASSWORD 'strongpassword' WITH ALL PRIVILEGES"
+curl -G http://localhost:8086/query -u username:password --data-urlencode "q=SHOW DATABASES"
