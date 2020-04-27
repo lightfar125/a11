@@ -46,6 +46,9 @@ auth-enabled = true
 
 curl -XPOST "http://localhost:8086/query" --data-urlencode "q=CREATE USER influxadmin WITH PASSWORD 'SNBBRHEL7cis' WITH ALL PRIVILEGES"
  influx -username 'influxadmin' -password 'SNBBRHEL7cis'
+CREATE DATABASE telegraf
+CREATE USER telegraf WITH PASSWORD 'SNBBRHEL7cis'
+GRANT ALL ON telegraf TO telegraf
 
 ======
 Gragana
