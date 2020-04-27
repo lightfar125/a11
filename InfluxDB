@@ -1,3 +1,6 @@
+===========
+Telegrah
+===========
 cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
 [influxdb]
 name = InfluxDB Repository - RHEL \$releasever
@@ -7,11 +10,65 @@ gpgcheck = 1
 gpgkey = https://repos.influxdata.com/influxdb.key
 EOF
 
-yum -y install influxdb vim curl
+yum -y install telegraf
+/etc/telegraf/telegraf.conf
+server-hostname with your valid hostname.
+http://influxdb-ip:8086 with your valid InfluxDB URL, IP address, and port.
+database-name with InfluxDB database name for this host "telegraf"
+auth-username with InfluxDB http authentication username.
+auth-password with InfluxDB http authentication password.
+systemctl start telegraf && systemctl enable telegraf
+##firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.82.0/23" port port="8086" protocol="tcp" accept' --permanent
 
+
+=======
+Influx-db
+=======
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxDB Repository - RHEL \$releasever
+baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdb.key
+EOF
+
+
+yum -y install influxdb
 systemctl start influxdb && sudo systemctl enable influxdb
-sudo firewall-cmd --add-port=8086/tcp --permanent
-sudo firewall-cmd --reload
+firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.82.0/23" port port="8086" protocol="tcp" accept' --permanent
+firewall-cmd --reload
 
-curl -XPOST "http://localhost:8086/query" --data-urlencode "q=CREATE USER username WITH PASSWORD 'strongpassword' WITH ALL PRIVILEGES"
-curl -G http://localhost:8086/query -u username:password --data-urlencode "q=SHOW DATABASES"
+vi /etc/influxdb/influxdb.conf
+[http]
+auth-enabled = true
+
+
+curl -XPOST "http://localhost:8086/query" --data-urlencode "q=CREATE USER influxadmin WITH PASSWORD 'SNBBRHEL7cis' WITH ALL PRIVILEGES"
+ influx -username 'influxadmin' -password 'SNBBRHEL7cis'
+
+======
+Gragana
+======
+cat <<EOF | sudo tee /etc/yum.repos.d/grafana.repo
+[grafana]
+name=grafana
+baseurl=https://packages.grafana.com/oss/rpm
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+EOF
+
+yum -y install grafana
+
+/etc/grafana/grafana.ini
+ /var/lib/grafana/grafana.db
+
+
+systemctl start grafana-server && systemctl enable grafana-server
+
+firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.82.0/23" port port="3000" protocol="tcp" accept' --permanent
+firewall-cmd --reload
