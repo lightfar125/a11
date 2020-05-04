@@ -26,6 +26,11 @@ server {
 cronjob
 0 * * * * /usr/sbin/certbot-auto renew
 
+test renew
+certbot renew --dry-run
+actualy renew cmd
+certbot renew
+
 
 
 
