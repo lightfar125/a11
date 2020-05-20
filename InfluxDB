@@ -18,6 +18,18 @@ database-name with InfluxDB database name for this host "telegraf"
 auth-username with InfluxDB http authentication username.
 auth-password with InfluxDB http authentication password.
 systemctl start telegraf && systemctl enable telegraf
+e.g
+[[outputs.influxdb]]
+  database = "telegraf"
+  urls = [ "http://192.168.83.215:8086" ]
+  username = "telegraf"
+  password = "SNBBRHEL7cis"
+
+[[outputs.influxdb]]
+  database = "telegraf"
+  urls = [ "http://192.168.83.180:8086" ]
+  username = "telegraf"
+  password = "SNBBRHEL7cis"
 ##firewall-cmd --add-rich-rule 'rule family="ipv4" source address="192.168.82.0/23" port port="8086" protocol="tcp" accept' --permanent
 
 
