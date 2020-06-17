@@ -1,13 +1,23 @@
+###memberof: cn=sn-netbox-users,cn=groups,cn=accounts,dc=singnet,dc=com,dc=sg
+
 import ldap
+import logging, logging.handlers
 from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 
 LDAP_SERVER = 'ipa-svr01.singnet.com.sg'
 AUTH_LDAP_SERVER_URI = 'ldap://' + LDAP_SERVER
+AUTH_LDAP_CONNECTION_OPTIONS = {ldap.OPT_REFERRALS: 0}
 
-AUTH_LDAP_BIND_DN = ''
-AUTH_LDAP_BIND_PASSWORD = ''
+
+
+#AUTH_LDAP_BIND_DN = 'uid=kuangyen,cn=users,cn=accounts,dc=singnet,dc=com,dc=sg'
+#AUTH_LDAP_BIND_PASSWORD = "Pur0$angue"
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
+LDAP_IGNORE_CERT_ERRORS = True
+
+#AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,cn=sn-netbox-users,cn=groups,cn=accounts,dc=singnet,dc=com,dc=sg'
 AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,cn=users,cn=accounts,dc=singnet,dc=com,dc=sg'
+#AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,cn=ipausers,cn=groups,cn=accounts,dc=singnet,dc=com,dc=sg'
 
 AUTH_LDAP_USER_ATTR_MAP = {
     'first_name': 'givenName',
@@ -15,6 +25,19 @@ AUTH_LDAP_USER_ATTR_MAP = {
     'email': 'mail'
 }
 
+AUTH_LDAP_GROUP_BASE = "cn=groups,cn=accounts,dc=singnet,dc=com,dc=sg"
+
+
+AUTH_LDAP_GROUP_FILTER = "(objectClass=groupOfNames)"
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(AUTH_LDAP_GROUP_BASE,
+                                    ldap.SCOPE_SUBTREE, AUTH_LDAP_GROUP_FILTER)
+AUTH_LDAP_GROUP_TYPE = GroupOfNamesType(name_attr="cn")
+AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+#    'is_staff': 'cn=sn-netbox-users,' + AUTH_LDAP_GROUP_BASE,
+    'is_staff': 'cn=ipausers,' + AUTH_LDAP_GROUP_BASE,
+#    'is_support': 'cn=ipausers,' + AUTH_LDAP_GROUP_BASE,
+#    'is_superuser': 'cn=ipausers,' + AUTH_LDAP_GROUP_BASE,
+}
 
 AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
@@ -31,3 +54,14 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 }
 
 AUTH_LDAP_START_TLS = True
+AUTH_LDAP_FIND_GROUP_PERMS = True
+AUTH_LDAP_CACHE_GROUPS = True
+AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+
+
+logfile = "/opt/netbox/logs/django-ldap-debug.log"
+my_logger = logging.getLogger('django_auth_ldap')
+my_logger.setLevel(logging.DEBUG)
+handler = logging.handlers.RotatingFileHandler(
+   logfile, maxBytes=1024 * 500, backupCount=5)
+my_logger.addHandler(handler)
