@@ -1,0 +1,25 @@
+
+
+yum install Judy-devel libuv cmake json-devel autoconf-archive autogen json-c-devel libmnl-devel libuv-devel lz4-devel nmap-ncat openssl-devel python3 git zlib-devel libuuid-devel libmnl gcc make git autoconf automake pkgconfig curl findutils
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+git clone https://github.com/netdata/netdata.git --depth=100
+cd netdata/
+sudo ./netdata-installer.sh
+systemctl start netdata && systemctl enable netdata
+firewall-cmd --permanent --add-rich-rule 'rule family="ipv4" source address="192.168.1.0/24" port protocol="tcp" port="19999" accept'
+firewall-cmd --reload
+
+
+
+
+tls
+[web]
+    ssl key = /etc/netdata/ssl/key.pem
+    ssl certificate = /etc/netdata/ssl/cert.pem
+generate selfsign 
+    openssl req -newkey rsa:2048 -nodes -sha512 -x509 -days 365 -keyout key.pem -out cert.pem
+    
+    [web]
+    tls version = 1.3
+    tls ciphers = TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
