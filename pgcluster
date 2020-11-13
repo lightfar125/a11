@@ -126,9 +126,16 @@ wal_keep_segments = 10
 [root@node1 data]# chmod 700 /var/lib/pgsql/data/archive/
 [root@node1 data]# chown -R postgres:postgres /var/lib/pgsql/data/archive/
 [root@node1 data]# vi /var/lib/pgsql/data/pg_hba.conf
-host    all             all             0.0.0.0/0               trust
-host	netbox		netbox		192.168.83.11/32	md5
-host	netbox		netbox		192.168.82.23/32	md5
+host    all             all             127.0.0.1/32               md5
+host    netbox          netbox          192.168.83.11/32        md5
+host    netbox          netbox          192.168.82.23/32        md5
+
+local   all             all                                     peer
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            ident
+# IPv6 local connections:
+host    all             all             ::1/128                 ident
+
 	
 
 Node1
@@ -137,6 +144,9 @@ sudo -u postgres psql
 CREATE DATABASE netbox;
 CREATE USER netbox WITH PASSWORD 'passnetbox';
 GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox;
+
+CREATE DATABASE nbipcore;
+GRANT ALL PRIVILEGES ON DATABASE nbipcore TO netbox;
 \q
 systemctl stop postgresql-9.5
 umount /var/lib/pgsql/
