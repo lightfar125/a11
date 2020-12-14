@@ -9,7 +9,7 @@ chcon -Rt httpd_sys_content_t /opt/netbox/netbox/static
 ########enable epel RHEL7.7(preinstall python3)
 
 
-yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 yum install postgresql95-server postgresql95 postgresql95-devel
 /usr/pgsql-9.5/bin/postgresql95-setup initdb
 sed -i 's/^\(local.*\)peer$/\1md5/g' /var/lib/pgsql/data/pg_hba.conf
