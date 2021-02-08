@@ -1,3 +1,6 @@
+apache
+https://linuxize.com/post/secure-apache-with-let-s-encrypt-on-centos-7/
+
 Self sign
 
 sudo mkdir /etc/ssl/private
