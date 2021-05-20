@@ -26,6 +26,13 @@ systemctl restart postgresql-9.6
 systemctl restart postgresql-9.5
 
 
+
+###to restart postgres in cluster
+vi /var/lib/pgsql/9.5/data/pg_hba.conf
+pcs resource restart postgresql_service
+
+
+
 yum install -y gcc libxml2-devel libxslt-devel libffi-devel graphviz openssl-devel redhat-rpm-config redis bzip2-devel sqlite-devel git wget
 ===============================
 RHEL below 7.7 require python3.6
